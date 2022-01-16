@@ -70,7 +70,7 @@ def news_topics(update: Update, context: CallbackContext):
 if __name__=="__main__":
     bot = Bot(TOKEN)
     # updater=Updater(TOKEN)  # updater will keep polling and receive the updates from telegram and move it to the dispatcher
-    bot.set_webhook("https://intense-reaches-28598.herokuapp.com/"+ TOKEN)   #URL of port 8443 created by ngrok, now we are not using telegram server
+    bot.set_webhook("https://fierce-shore-54570.herokuapp.com/"+ TOKEN)   #URL of port 8443 created by ngrok, now we are not using telegram server
     dp = Dispatcher(bot, None)
     
     
