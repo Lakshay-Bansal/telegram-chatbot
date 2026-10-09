@@ -2,36 +2,59 @@
 
 A modern, production-ready Telegram Bot built with Python and Flask, engineered specifically for **100% free serverless deployment on [Vercel](https://vercel.com)**.
 
-Includes built-in interactive keyboards, real-time Google News RSS parsing across 9 categories, sticker/message echoing, and a 1-click webhook registration endpoint.
+Includes built-in interactive keyboards, real-time Google News RSS parsing across 9 categories, sticker/message echoing, a 1-click webhook registration endpoint, and complete tracking of developmental milestones.
 
 ---
 
 ## 🌟 Key Features
 
 - ⚡ **Vercel Serverless**: Runs completely on serverless functions with zero idle cost and ultra-fast cold starts.
-- 📰 **Live Real-Time News**: Instant news fetching across 9 categories (*Top Stories, World, Nation, Business, Technology, Entertainment, Sports, Science, Health*) via Google News RSS without needing third-party API keys.
+- 📰 **Live Real-Time News**: Instant news fetching across 9 categories (*Top Stories, World, Nation, Business, Technology, Entertainment, Sports, Science, Health*) via Google News RSS without third-party API keys.
 - ⌨️ **Interactive Telegram Keyboards**: Custom reply keyboards for smooth category navigation.
 - 🔄 **Sticker & Text Echoing**: Mirrors stickers and fallback text seamlessly.
 - 🛠️ **1-Click Webhook Setup**: Navigate to `https://<your-domain>.vercel.app/set_webhook` in any browser to automatically link Telegram to your Vercel deployment.
 - 💻 **Dual Mode (Local & Cloud)**:
   - **Local Development**: Run `python bot.py` to test with long-polling (no ngrok or public URL required!).
   - **Cloud Production**: Deploys to Vercel via stateless webhooks.
+- 📜 **Complete Version History**: Includes and documents all developmental milestones in [`versions/`](versions/) from the initial prototype to Dialogflow NLP, keyboards, and serverless production.
 
 ---
 
 ## 📁 Project Structure
 
 ```text
+chat_bot/
 ├── api/
-│   └── index.py            # Main serverless entrypoint (Flask app & webhook handler)
-├── bot.py                  # Local runner (polling mode & local server)
-├── vercel.json             # Vercel routing and rewrite configuration
-├── requirements.txt        # Minimal, lean production dependencies (Flask & requests)
-├── .env.example            # Environment variables template
-├── .gitignore              # Configured for Python & Vercel builds
-├── Procfile                # (Optional) For alternative deployment on Render/Railway
-└── README.md               # Documentation & setup guide
+│   └── index.py                        # Main serverless entry point (Flask app & webhook handler)
+├── bot.py                              # Local runner (polling mode & local server)
+├── vercel.json                         # Vercel routing and rewrite configuration
+├── requirements.txt                    # Lean production dependencies (Flask & requests)
+├── .env.example                        # Environment variables template
+├── .gitignore                          # Configured for Python & Vercel builds
+├── Procfile                            # (Optional) For deployment on Render/Railway
+├── README.md                           # Documentation, setup guide & version history
+└── versions/                           # Developmental milestones & reference scripts
+    ├── telegram_bot.py                 # Core telegram bot script (tracked across git commits)
+    ├── dialogflow.py                   # Google Dialogflow NLP session & intent detection logic
+    └── fetch_news.py                   # Standalone news retrieval script using gnewsclient
 ```
+
+---
+
+## 📜 Project Evolution & Version History
+
+This repository tracks the complete journey of the bot across incremental commits and architectural improvements:
+
+| Step / Commit | Milestone | Description |
+| :--- | :--- | :--- |
+| **v1.0** (`c83af25`) | Initial Echo Bot | First working prototype using classic `(bot, update)` handlers with `/start`, `/help`, `echo_text`, and `echo_sticker`. |
+| **v2.0** (`03e8c90`) | Modern Handler Architecture | Refactored callback signatures to `(update: Update, context: CallbackContext)` and switched to `update.message.reply_text`. |
+| **v3.0** (`6d914e4`) | Webhook & Public Server | Migrated from client-side polling to event-driven webhooks using Flask and `ngrok` on port 8443. |
+| **v4.0** (`751a5f0`) | Google Dialogflow Connection | Added [`dialogflow.py`](versions/dialogflow.py) to connect to Google Cloud Dialogflow (`newsextractor-tjiy`) for NLP intent detection (`get_news` vs `small_talk`). |
+| **v4.1** (`0ddbc1b`) | Dialogflow Bot Integration | Integrated `dialogflow.py` with `telegram_bot.py` to parse user queries, extract news topics, and return article links. |
+| **v4.2** (`a8d0465`) | Standalone News Retrieval | Added [`fetch_news.py`](versions/fetch_news.py) using `gnewsclient` to test fetching news by topic, language, and country. |
+| **v5.0** (`76979b4`) | Interactive Category Keyboards | Added `topics_keyboard` and `/news_topics` command returning a 3x3 `ReplyKeyboardMarkup` for intuitive user navigation. |
+| **v6.0** (`dc79a71`) | Vercel Serverless Production | Converted bot to production serverless architecture with `api/index.py`, 1-click `/set_webhook`, RSS feeds, and local runner `bot.py`. |
 
 ---
 
@@ -49,12 +72,10 @@ Includes built-in interactive keyboards, real-time Google News RSS parsing acros
 ---
 
 ### Step 2: Push This Repository to GitHub
-If you haven't pushed your code to GitHub yet:
 ```bash
 git add .
-git commit -m "Configure Vercel serverless Telegram bot"
-git branch -M main
-git push -u origin main
+git commit -m "Update documentation and version history"
+git push origin main
 ```
 
 ---
@@ -96,11 +117,8 @@ Once deployed, Vercel assigns you a URL (e.g. `https://my-telegram-bot.vercel.ap
 
 You can test and run the bot on your computer without deploying or using webhooks.
 
-### 1. Clone & Set Up Virtual Environment
+### 1. Set Up Virtual Environment
 ```bash
-git clone https://github.com/Lakshay-Bansal/telegram-chatbot.git
-cd telegram-chatbot
-
 # Create virtual environment
 python -m venv venv
 
