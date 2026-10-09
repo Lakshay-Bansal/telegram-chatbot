@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jan 14 16:32:10 2022
+Created on Fri Jan 14 18:58:02 2022
 
 @author: laksh
 """
 
 import logging
-from telegram.ext import Updater,CommandHandler,MessageHandler,Filters,CallbackContext, Dispatcher
-from telegram import Update, Bot
-from flask import Flask, request
+from telegram.ext import Updater,CommandHandler,MessageHandler,Filters,CallbackContext
+ #Enable logging
+from telegram import Update,Bot
+from dialogflow import get_reply, fetch_news
 
-#Enable logging
-#logging: any kind of error happen or warning is raised, so this is used to parse it in a systematic manner 
+ #logging: any kind of error happen or warning is raised, so this is used to parse it in a systematic manner 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
  	                level=logging.INFO)
 #logger object can create logs for your program
@@ -20,17 +20,6 @@ logger=logging.getLogger(__name__)
 TOKEN ="5083717400:xyz-WceD1aZ6vIvI"
 #https://python-telegram-bot.readthedocs.io/en/stable/ go to this link for referring the func usage
 
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return "Hello!"
-
-@app.route(f'/{TOKEN}', methods=['GET', 'POST'])
-def webhook():
-    update = Update.de_json(request.get_json(), bot)
-    dp.process_update(update)
-    return "ok"
 
 def greeting(update: Update,context: CallbackContext):
     print(update)
@@ -42,10 +31,22 @@ def _help(update: Update,context: CallbackContext):
     help_txt = "In case of query contact 9911****."
     update.message.reply_text(help_txt)
 
+def reply_text(update: Update,context: CallbackContext):
+    intent, reply = get_reply(update.to_dict()['message']['text'], update.to_dict()['message']['chat_id'])
 
-def echo_text(update: Update,context: CallbackContext):
-    text = update.to_dict()['message']['text']
-    update.message.reply_text(text)
+    if intent == 'get_news':
+        #For initial testing
+        # text = "Ok! I will show you news with {}".format(reply)
+        # update.message.reply_text(text)
+        
+        articles_link = fetch_news(reply)
+        for artLink in articles_link:
+            update.message.reply_text(artLink['link'])
+        
+    else:
+        update.message.reply_text(reply)
+        
+    
 
 
 def echo_sticker(update, context: CallbackContext):
@@ -56,14 +57,9 @@ def error(bot,update):
 
 
 def main():
-    bot = Bot(TOKEN)
-    # Update the url whenever you start the ngrok server 
-    bot.set_webhook("https://3cc6-103-95-82-83.ngrok.io/"+ TOKEN)   #URL of port 8443, created using ngrok 
-    dp = Dispatcher(bot, None)
-    # #Now we are not polling from telegram
-    # updater=Updater(TOKEN)#updator will keep polling and receive the updates from telegram and move it to the dispatcher
-    # #dispatcher handles those updates
-    # dp=updater.dispatcher #all the response will be handled
+    updater=Updater(TOKEN)#updator will keep polling and receive the updates from telegram and move it to the dispatcher
+    #dispatcher handles those updates
+    dp=updater.dispatcher #all the response will be handled
 
     #Add handlers
     #dispatcher needs multiple handlers
@@ -74,11 +70,10 @@ def main():
     dp.add_handler(MessageHandler(Filters.text , echo_text))
     dp.add_handler(MessageHandler(Filters.sticker ,echo_sticker))
     dp.add_error_handler(error)
-    
-    app.run(port=8443)
-    # These will also get commented as we are not using telegram polling layer or server
-    # updater.start_polling()
-    # logger.info("Started polling...")
-    # updater.idle()#waits until the user presses ctrl+c or anything to stop the program
-if __name__ == "__main__":
+
+    updater.start_polling()
+    logger.info("Started polling...")
+    updater.idle()#waits until the user presses ctrl+c or anything to stop the program
+
+if __name__=="__main__":
     main()
